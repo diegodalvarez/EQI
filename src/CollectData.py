@@ -23,6 +23,8 @@ class DataCollector:
         self.repo_path = os.path.abspath(os.path.join(os.getcwd(), ".."))
         self.data_path = os.path.join(self.repo_path, "data")
         
+        if not os.path.exists(self.data_path): os.makedirs(self.data_path)
+        
     def get_yf_data(self, verbose: bool = True) -> None: 
         
         if verbose: print("Getting Raw YF Data")
