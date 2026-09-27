@@ -49,6 +49,40 @@ class DataCollector:
         if verbose: print("Saving data\n")
         df_out.to_parquet(path = out_path, engine = "pyarrow")
         
+    def get_yf_rand_spx(self, verbose: bool = True) -> None: 
+        
+        if verbose: print("Getting Random SPX Tickers Data")
+        out_path = os.path.join(self.data_path, "RawSPXSTocks.parquet")
+        
+        if os.path.exists(out_path):
+            if verbose: print("Already have YF Data\n")
+            return None
+        
+        ticker_path = os.path.join(self.data_path, "RandomSPXTickers.xlsx")
+        tickers     = (pd
+                .read_excel(io = ticker_path)
+                .Symbol
+                .drop_duplicates()
+                .sort_values()
+                .to_list())
+        
+        df_raw = (yf
+                  .download(
+                      tickers     = tickers,
+                      start       = self.start_date,
+                      end         = self.end_date,
+                      auto_adjust = False)
+                  .reset_index())
+        
+        df_out = (df_raw
+                  .melt(id_vars = [("Date", "")])
+                  .rename(columns = {("Date", ""): "date"}))
+        
+        if verbose: print("Saving data\n")
+        df_out.to_parquet(path = out_path, engine = "pyarrow")
         
 if __name__ == "__main__": 
-    DataCollector().get_yf_data()
+
+    data_collector = DataCollector()
+    #data_collector.get_yf_data()
+    data_collector.get_yf_rand_spx()
